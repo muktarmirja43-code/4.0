@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #fff;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --font-handwriting: 'Dancing Script', cursive;
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-body);
+            overflow: hidden;
+            height: 100vh;
+            color: white;
+            background: linear-gradient(
+                45deg,
+                #2b0036,
+                #4b0055,
+                #6a0572,
+                #9a0572,
+                #ff5fa2
+            );
+            background-size: 400% 400%;
+            animation: gradientBG 18s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            height: 80vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .pages {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .page.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 15px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: 0.3s;
+        }
+
+        .nav-btn.active,
+        .nav-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .music-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            font-family: var(--font-handwriting);
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .btn-main {
+            padding: 12px 30px;
+            background: rgba(255,255,255,0.3);
+            border: 1px solid white;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-main:hover {
+            background: white;
+            color: #6a0572;
+        }
+
+        .photo-frame {
+            width: 100%;
+            height: 300px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.4);
+            position: relative;
+        }
+
+        .photo-frame img {
+            position: middle;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 60s;
+        }
+
+        .photo-frame img.active {
+            opacity: 5;
+        }
+
+        #canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .letter-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+            z-index: 20;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .letter-overlay.active {
+            display: flex;
+        }
+
+        .letter-paper {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.35);
+            color: white;
+            width: 80%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 20px;
+            font-family: var(--font-handwriting);
+            font-size: 1.5rem;
+            box-shadow: 0 0 40px rgba(255,255,255,0.4);
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(.2,1.3,.3,1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .letter-overlay.active .letter-paper {
+            transform: scale(1);
+        }
+
+        .close-letter {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="music-control" onclick="toggleMusic()">
+    <i id="music-icon" class="fas fa-volume-mute"></i>
+</div>
+
+<audio id="bg-music" loop>
+    <source src="ReelAudio-8396.mp3" type=".mp3">
+</audio>
+
+<canvas id="canvas"></canvas>
+
+<div class="letter-overlay" id="letter-overlay">
+    <div class="letter-paper">
+        <span class="close-letter" onclick="closeLetter()">&times;</span>
+       <h2>Dear Suriya,</h2>
+<p>
+    I don’t know if this little letter will make you smile or just make you laugh, but I hope it does at least one of those things 😄✨
+    <br><br>
+    You have a way of making ordinary moments feel a bit brighter 🌼. This year taught me that kindness is powerful, calm confidence stands out, and somehow coding a whole website is easier than finding the perfect words 🙃💻
+    <br><br>
+    Wishing you a New Year filled with peace, small wins, big smiles, and zero stress alarms ⏰—and if this adds even 1% extra happiness to your day, I’ll call it a successful deployment 🚀😊💖
+    <br><br>
+   
+</p>
+    </div>
+</div>
+
+<div class="glass-container">
+    <div class="pages">
+
+        <div class="page active" id="home">
+            <h1>Welcome</h1>
+            <p>I coded this website especially for you,<br> as a small way to welcome the New Year. ✨</p>
+            <button class="btn-main" onclick="goToPage('letter-intro')">Next ➜</button>
+        </div>
+
+        <div class="page" id="letter-intro">
+            <h1>Happy New Year</h1>
+            <p>I wrote something for you.</p>
+            <button class="btn-main" onclick="openLetter()">Open Letter 💌</button>
+            <button class="btn-main" onclick="goToPage('gallery')">Next ➜</button>
+        </div>
+
+        <div class="page" id="gallery">
+            <h1>Memories</h1>
+            <div class="photo-frame">
+                <img src="IMG-20250102-WA0048.jpg" class="active">
+                <img src="IMG-20250102-WA0044.jpg" >
+                <img src="IMG-20250203-WA0248.jpg">   
+            </div>
+            <button class="btn-main" onclick="goToPage('credits')">Next ➜</button>
+        </div>
+
+        <div class="page" id="credits">
+            <h1>Always</h1>
+            <p>move forward, even when progress is quiet — consistency changes everything. 🚀.</p>
+            <button class="btn-main" onclick="goToPage('home')">Back to Start ↺</button>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <button class="nav-btn active" onclick="goToPage('home')"><i class="fas fa-home"></i></button>
+        <button class="nav-btn" onclick="goToPage('letter-intro')"><i class="fas fa-envelope"></i></button>
+        <button class="nav-btn" onclick="goToPage('gallery')"><i class="fas fa-images"></i></button>
+        <button class="nav-btn" onclick="goToPage('credits')"><i class="fas fa-star"></i></button>
+    </div>
+</div>
+
+<script>
+const pages = ['home','letter-intro','gallery','credits'];
+
+function goToPage(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.nav-btn')[pages.indexOf(id)].classList.add('active');
+}
+
+const music=document.getElementById('bg-music');
+const icon=document.getElementById('music-icon');
+let playing=false;
+function toggleMusic(){
+    playing?music.pause():music.play();
+    icon.className=playing?'fas fa-volume-mute':'fas fa-volume-up';
+    playing=!playing;
+}
+
+let slide=0;
+const imgs=document.querySelectorAll('.photo-frame img');
+setInterval(()=>{
+    imgs[slide].classList.remove('active');
+    slide=(slide+1)%imgs.length;
+    imgs[slide].classList.add('active');
+},3000);
+
+function openLetter(){
+    document.getElementById('letter-overlay').classList.add('active');
+    if(!playing)toggleMusic();
+}
+function closeLetter(){
+    document.getElementById('letter-overlay').classList.remove('active');
+}
+
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+let particles=[];
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
+resize();addEventListener('resize',resize);
+
+function fire(x,y){
+    for(let i=0;i<30;i++){
+        particles.push({
+            x,y,
+            vx:(Math.random()-.5)*6,
+            vy:(Math.random()-.5)*6,
+            r:Math.random()*3+1,
+            a:1,
+            c:`hsl(${Math.random()*360},100%,70%)`
+        });
+    }
+}
+
+(function loop(){
+    requestAnimationFrame(loop);
+    ctx.fillStyle='rgba(0,0,0,0.1)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    if(Math.random()<0.05) fire(Math.random()*canvas.width,Math.random()*canvas.height/2);
+    particles=particles.filter(p=>p.a>0);
+    particles.forEach(p=>{
+        p.vy+=0.05;
+        p.x+=p.vx;
+        p.y+=p.vy;
+        p.a-=0.01;
+        ctx.globalAlpha=p.a;
+        ctx.fillStyle=p.c;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fill();
+    });
+})();
+</script>
+</body>
+</html>
